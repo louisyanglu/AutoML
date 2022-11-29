@@ -37,6 +37,14 @@ sum(i ** 2 for i in range(5))  # 生成器
 
     ```python
     [[(i, j) for i in ['桃', '星', '梅', '方']] for j in range(2, 6)]  # 结果是列表内嵌列表
+    ```
+
+-   带`if`判断
+
+    ```python
+    L = [1, 2, 3, 4, 5, 6, 7]
+    [i if i <= 5 else 5 for i in L]  # [1, 2, 3, 4, 5, 5, 5]
+    [i for i in L if i <= 5]  # [1, 2, 3, 4, 5]
 
 ##### 1.1.2  匿名函数
 
@@ -55,7 +63,115 @@ list(filter(func, lst))  # 包含3的整数倍的内层列表
 list(filter(lambda x: sum(1 if i % 3 == 0 else 0 for i in x) > 0, lst))
 ```
 
+##### 1.1.3  打包函数
+
+同时遍历两个迭代器相同位置的元素
+
+```python 
+l1 = list('abc')
+l2 = ['apple', 'banana', 'cat']
+res = list(zip(l1, l2))  # 打包
+list(zip(*res))  # 解包
+
+for i, j in enumerate(l1):
+    print(i, j)
+    
+for i, j in zip(range(len(l1)), l1):
+    print(i, j)
+```
+
 #### 1.2  NumPy基础
+
+##### 1.2.1  NumPy数组的构造
+
+常用：`np.array([1, 2])`
+
+1.   等差数列
+
+     `np.linspace()`、`np.arange()`
+
+2.   特殊矩阵
+
+     `np.zeros()`、`np.ones()`、`np.eye()`、`np.full()`
+
+     `np.zeros_like()`、`np.ones_like()`、`np.full_like()`
+
+3.   随机数组
+
+     -   均匀分布**[low, high)**:  `np.random.uniform(low=0, high=1, size=(2, 3))`
+         -   均匀0-1分布**[0, 1)**: `np.random.rand(2, 3, 4)`
+     -   正态分布$N[\mu,\sigma^2]$: `np.random.normal(loc=0, scale=1, size=(2, 3))`
+         -   标准正态分布$N[0, 1]$: `np.random.randn(2, 3, 4)`
+     -   离散均匀分布整数数组: `np.random.randint(low=0, high=1, size=(2, 3))`
+     -   有放回抽样: `np.random.choice(a=range(5), size=(2, 3), p=[0.1, 0.2, 0.3, 0.2, 0.2])`
+         -   无放回抽样: `np.random.choice(a=range(5), size=(2, 3), replace=False`
+     -   打散: `np.random.permutation([1, 2, 3])`
+         -   等价于无放回抽样列表所有元素: `np.random.choice([1, 2, 3], 3, replace=False)`
+
+4.   随机种子: `np.random.seed(7)`
+
+##### 1.2.2  NumPy数组的变形
+
+1.   数组元素组织方式变化导致的变形
+
+     -   维度交换
+
+         ```python 
+         arr = np.arange(6).reshape(1, 2, 3)
+         np.transpose(a=arr, axes=(1, 2, 0))  # 原来的1维放到现在的0维，原来的2维放到1维
+         
+         arr.T == np.transpose(2, 1, 0) == np.transpose(arr)  # 默认维度逆向交换
+         
+         # 交换两个维度，np.transpose()需要写出所有维度
+         np.swapaxes(a=arr, axis1=1, axis2=0)
+
+     -   维度变换
+
+         ```python 
+         # reshape默认以行的顺序来读写，order='C'
+         arr = np.arange(6).reshape(1, 2, 3, order='F')  # 列优先
+         
+         # 维度增加
+         arr = np.arange(6).reshape(2, 3)
+         expand_arr = np.expand_dims(a=arr, axis=(0, 1, 4))  # (1, 1, 2, 3, 1)
+         (arr.reshape(1, 1, 2, 3, 1) == expand_arr).all()
+         # 维度缩减
+         np.squeeze(expand_arr, axis=(0, 1)).shape  # (2, 3, 1)，默认缩减所有=1的维度
+
+2.   数组合并或拆分导致的变形
+
+     -   合并`np.stack()`、`np.concatenate()`
+
+         ```python
+         # np.stack()，拼接的数组必须尺寸相同，且产生新的维度，axis决定新维度在哪产生，维度大小由拼接的数组数量决定
+         arr1 = np.arange(12).reshape(4, 3)
+         arr2 = np.arange(12, 24).reshape(4, 3)
+         np.stack([arr1, arr2], axis=0).shape  # (2, 4, 3)
+         np.stack([arr1, arr2], axis=1).shape  # (4, 2, 3)
+         np.stack([arr1, arr2], axis=2).shape  # (4, 3, 2)
+         
+         # np.concatenate只需在拼接的维度上一样即可
+         np.concatenate([arr1, arr2], axis=2)  # AxisError: axis 2 is out of bounds for array of dimension 2
+
+     -   拆分`np.split()`
+
+         ```python 
+         # np.split()，indices_or_sections为整数表示均分，为一维序列，表示沿着axis用索引切割
+         # indices_or_sections=[2, 3]表示：arr[:2]、arr[2:3]、arr[3:]
+         np.split(arr, indices_or_sections=[1, 2], axis=0)
+         ```
+
+     -   重复`np.repeat()`
+
+         ```python
+         # np.repeat()，沿着axis对数组按照给定次数进行重复
+         arr = np.arange(6).reshape(2, 3)
+         np.repeat(a=arr, repeats=[2, 3], axis=0)
+         np.repeat(a=arr, repeats=[2, 3, 1], axis=1)  # repeats列表的长度必须与arr的轴的长度一致
+
+##### 1.2.3  NumPy数组的切片
+
+
 
 ### 第2章  pandas基础
 
