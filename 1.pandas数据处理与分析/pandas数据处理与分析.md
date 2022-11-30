@@ -135,6 +135,7 @@ for i, j in zip(range(len(l1)), l1):
          arr = np.arange(6).reshape(2, 3)
          expand_arr = np.expand_dims(a=arr, axis=(0, 1, 4))  # (1, 1, 2, 3, 1)
          (arr.reshape(1, 1, 2, 3, 1) == expand_arr).all()
+         arr[np.newaxis, np.newaxis, :, :, np.newaxis] == expand_arr
          # 维度缩减
          np.squeeze(expand_arr, axis=(0, 1)).shape  # (2, 3, 1)，默认缩减所有=1的维度
 
@@ -170,6 +171,59 @@ for i, j in zip(range(len(l1)), l1):
          np.repeat(a=arr, repeats=[2, 3, 1], axis=1)  # repeats列表的长度必须与arr的轴的长度一致
 
 ##### 1.2.3  NumPy数组的切片
+
+```python 
+# 输入切片，取子数组
+arr = np.arange(24).reshape(4, 2, 3)
+arr[0:2, 0:2, 0:2]  # 取2*2*2子数组
+
+# 输入长度相同的列表，不是取子数组，而是取元素，输入值表示元素在各个维度的索引
+arr[[0, 1], [0, 1]]  # 取出arr[0, 0]和arr[1, 1]
+arr[[0, 1], [0, 1], [0, 1]]  # 取出arr[0, 0, 0]和arr[1, 1, 1]
+
+# 输入布尔数组，保留某一维度的若干维数
+arr[[True, False, True, False], :, :]
+
+# 最后几个维度的:可以忽略
+arr[[True, False, True, False], :, :] == arr[[True, False, True, False]]
+arr[[0, 0, 0], [1, 1, 1], :] == arr[[0, 0, 0], [1, 1, 1]] 
+
+# 最初几个维度的:可以用...代替
+arr[:, :, 0:2] == arr[..., 0:2]
+```
+
+##### 1.2.4  广播机制
+
+数组$A$的维度：$d_p^A\times\cdots\times d_1^A$
+
+数组$B$的维度：$d_q^A\times\cdots\times d_1^A$
+
+设$r=max(p,q)$
+
+首先对数组维度小的数组补充维度：在数组**前面**补充，维数=1
+
+对比两个数组，对维数=1的维度进行复制扩充，维数=另一个数组相同位置的维数
+
+当相同位置的维数不相等，且任一维数都$\neq1$，则报错
+
+1.   标量和数组的广播
+
+     当一个标量和数组进行运算时，标量会自动把大小扩充为数组大小，之后进行逐元素操作
+
+2.   二维数组之间的广播
+
+     除非其中的某个数组的维度是$m×1$或者$1×n$，扩充其具有$1$的维度为另一个数组对应维度的大小，否则报错
+
+3.   一维数组与二维数组的广播
+
+     当一维数组$A_k$与二维数组$B_{m,n}$操作时，等价于把一维数组视作$A_{1,k}$的二维数组，当$k!=n$且$k,n$都不是$1$时报错
+
+     ```python
+     np.ones(3) + np.ones((2,3))  # OK
+     np.ones(2) + np.ones((2,3))  # 报错
+     ```
+
+##### 1.2.5  常用函数
 
 
 
