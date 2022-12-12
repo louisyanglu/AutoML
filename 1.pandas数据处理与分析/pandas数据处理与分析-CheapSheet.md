@@ -79,12 +79,12 @@
 |                 | 列连接                                   | `pd.merge()`                                                 |      |
 |                 | 索引连接                                 | `df1.join(df2)`                                              |      |
 |                 | 方向连接                                 | `pd.concat([], join=, axis=, keys=)`                         |      |
-|                 |                                          |                                                              |      |
-|                 |                                          |                                                              |      |
-|                 |                                          |                                                              |      |
-|                 |                                          |                                                              |      |
-|                 |                                          |                                                              |      |
-|                 |                                          |                                                              |      |
+|                 | 比较与组合                               | `df1.compare(df2, keep_shape=True)` <br> `df1.combine(df2, func, overwrite=False)` |      |
+| 缺失数据        |                                          |                                                              |      |
+|                 | 缺失信息的统计                           | `isna()、isnull()、notna()、notnull()`搭配`all、any`         |      |
+|                 | 缺失信息的删除                           | `dropna()`                                                   |      |
+|                 | 缺失值的填充                             | `fillna()`                                                   |      |
+|                 | 插值函数                                 | `s.interpolate(limit_direction='backward', limit=1)`         |      |
 |                 |                                          |                                                              |      |
 |                 |                                          |                                                              |      |
 
